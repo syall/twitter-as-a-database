@@ -2,6 +2,7 @@
   "name": "twitter-as-a-db",
   "version": "1.0.0",
   "description": "Using Twitter as a Database",
+  "repository": "https://github.com/syall/Twitter-as-a-Database",
   "main": "src/server.js",
   "author": "Steven Yuan",
   "license": "MIT",
