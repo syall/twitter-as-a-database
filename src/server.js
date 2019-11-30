@@ -11,7 +11,6 @@ app.listen(PORT, () => {
 	console.log(`${name} running on http://${HOST}:${PORT}`);
 });
 
-
 app.use(bodyParser.urlencoded({
 	extended: true
 }));
@@ -26,80 +25,70 @@ const {
 	DEFAULT_DB,
 } = process.env;
 
+const client = new twitter({
+	consumer_key,
+	consumer_secret,
+	access_token_key,
+	access_token_secret,
+});
+
+const dbURL = 'statuses/user_timeline';
+const dbParam = { screen_name: DEFAULT_DB };
+
+const tweetToRecord = tweet => {
+	const type = attr => attr.substring(attr.length - 4);
+	const field = attr => attr.substring(0, attr.length - 4).toLowerCase();
+	const parseHashtag = hashtag => {
+		const [attr] = hashtag.text.match(/^[A-Z]+/g);
+		const [val] = hashtag.text.match(/[a-z0-9][a-z0-9A-Z]*$/g);
+		switch (type(attr)) {
+			case 'STRG':
+				ret[field(attr)] = val;
+				break;
+			case 'BOOL':
+				ret[field(attr)] = val === 'true';
+				break;
+			case 'NUMB':
+				ret[field(attr)] = Number.parseInt(val);
+				break;
+			default:
+				break;
+		}
+	};
+	const ret = {};
+	tweet.entities.hashtags.forEach(parseHashtag);
+	return ret;
+};
+
+const toPublicUser = u => {
+	return {
+		id: u.id,
+		user: u.user,
+		active: u.active
+	};
+};
+
+const recordContains = field => value => record => record[field] === value;
+
 app.get('/users', async (req, res) => {
 	try {
-		const client = new twitter({
-			consumer_key,
-			consumer_secret,
-			access_token_key,
-			access_token_secret,
-		});
-		const tweets = await client.get('statuses/user_timeline', {
-			screen_name: DEFAULT_DB,
-		});
-		const users = tweets
-			.map(t => t.entities.hashtags.map(h => h.text))
-			.map(tags => {
-				const ret = {};
-				tags.forEach(hashtag => {
-					const [attr] = hashtag.match(/[A-Z]+/g);
-					const [val] = hashtag.match(/[a-z0-9]+/g);
-					const len = attr.length;
-					if (attr.endsWith('STR'))
-						ret[attr.substring(0, len - 3).toLowerCase()] = val;
-					else if (attr.endsWith('BOOL'))
-						ret[attr.substring(0, len - 4).toLowerCase()] = val === 'true';
-					else if (attr.endsWith('NUM'))
-						ret[attr.substring(0, len - 3).toLowerCase()] = Number.parseInt(val);
-					else
-						ret[attr.toLowerCase()] = val;
-				});
-				return ret;
-			});
-		res.json(users.map(u => {
-			return {
-				user: u.user,
-				active: u.active
-			};
-		}));
+		const tweets = await client.get(dbURL, dbParam);
+		const users = tweets.map(tweetToRecord);
+		res.json(users.map(toPublicUser));
 	} catch (err) {
-		res.status(400);
-		res.json(err);
+		res.status(400).json({
+			message: err.message
+		});
 	}
 });
 
 app.get('/login', async (req, res) => {
 	try {
 		const { username, password } = req.body;
-		const client = new twitter({
-			consumer_key,
-			consumer_secret,
-			access_token_key,
-			access_token_secret,
-		});
-		const users = await client.get('statuses/user_timeline', {
-			screen_name: DEFAULT_DB,
-		});
-		const [user] = users
-			.map(t => t.entities.hashtags.map(h => h.text))
-			.filter(u => u.includes(`USERSTR${username}`))
-			.map(tags => {
-				const ret = {};
-				tags.forEach(hashtag => {
-					const [attr] = hashtag.match(/[A-Z]+/g);
-					const [val] = hashtag.match(/[a-z0-9]+/g);
-					const len = attr.length;
-					if (attr.endsWith('STR'))
-						ret[attr.substring(0, len - 3).toLowerCase()] = val;
-					else if (attr.endsWith('BOOL'))
-						ret[attr.substring(0, len - 4).toLowerCase()] = val === 'true';
-					else if (attr.endsWith('NUM'))
-						ret[attr.substring(0, len - 3).toLowerCase()] = Number.parseInt(val);
-					else
-						ret[attr.toLowerCase()] = val;
-				});
-				return ret;
-			});
+		const tweets = await client.get(dbURL, dbParam);
+		const [user] = tweets
+			.map(tweetToRecord)
+			.filter(recordContains('user')(username));
 		if (!user)
 			throw new Error('User not found.');
 		if (password.localeCompare(user.password))
