@@ -34,8 +34,9 @@ const client = new twitter({
 	access_token_secret,
 });
 
-const dbURL = 'statuses/user_timeline';
-const dbParam = { screen_name: DEFAULT_DB };
+const getURL = 'statuses/user_timeline';
+const deleteURL = 'statuses/destroy';
+const createURL = 'statuses/update';
 
 const tweetToRecord = tweet => {
 	const type = attr => attr.substring(attr.length - 4);
@@ -57,14 +58,17 @@ const tweetToRecord = tweet => {
 				break;
 		}
 	};
-	const ret = {};
+	const ret = { id: tweet.id_str };
 	tweet.entities.hashtags.forEach(parseHashtag);
 	return ret;
 };
 
+const startWithQuery = query => record => record.user.startsWith(query);
+
+const userIsActive = record => record.active;
+
 const toPublicUser = u => {
 	return {
-		id: u.id,
 		user: u.user,
 		active: u.active
 	};
@@ -74,7 +78,7 @@ const recordContains = field => value => record => record[field] === value;
 
 app.get('/users', async (req, res) => {
 	try {
-		const tweets = await client.get(dbURL, dbParam);
+		const tweets = await client.get(getURL, { screen_name: DEFAULT_DB });
 		const users = tweets.map(tweetToRecord);
 		res.json(users.map(toPublicUser));
 	} catch (err) {
@@ -84,10 +88,136 @@ app.get('/users', async (req, res) => {
 	}
 });
 
+app.get('/users/active', async (req, res) => {
+	try {
+		const tweets = await client.get(getURL, { screen_name: DEFAULT_DB });
+		const users = tweets
+			.map(tweetToRecord)
+			.filter(userIsActive);
+		res.json(users.map(toPublicUser));
+	} catch (err) {
+		res.status(400).json({
+			message: 'Unable to get Public Users.'
+		});
+	}
+});
+
+app.get('/users/search/:query', async (req, res) => {
+	try {
+		const { query } = req.params;
+		const tweets = await client.get(getURL, { screen_name: DEFAULT_DB });
+		const users = tweets
+			.map(tweetToRecord)
+			.filter(startWithQuery(query));
+		res.json(users.map(toPublicUser));
+	} catch (err) {
+		res.status(400).json({
+			message: 'Unable to get Public Users.'
+		});
+	}
+});
+
+app.post('/users/create', async (req, res) => {
+	try {
+		const { user, password } = req.body;
+		if (!user || !password)
+			throw new Error();
+		const tweets = await client.get(getURL, { screen_name: DEFAULT_DB });
+		const [userFound] = tweets
+			.map(tweetToRecord)
+			.filter(recordContains('user')(user));
+		if (userFound)
+			throw new Error();
+		const { created_at } = await client.post(createURL, {
+			status:
+				`#USERSTRG${user} ` +
+				`#PASSWORDSTRG${password} ` +
+				`#ACTIVEBOOLtrue`
+		});
+		if (!created_at)
+			throw new Error();
+		res.json({ user, active: true });
+	} catch (err) {
+		res.status(400).json({
+			message: 'Unable to create user.'
+		});
+	}
+});
+
+app.get('/users/read/:user', async (req, res) => {
+	try {
+		const { user } = req.params;
+		const tweets = await client.get(getURL, { screen_name: DEFAULT_DB });
+		const [userFound] = tweets
+			.map(tweetToRecord)
+			.filter(recordContains('user')(user));
+		if (!userFound)
+			throw new Error();
+		res.json(toPublicUser(userFound));
+	} catch (err) {
+		res.status(400).json({
+			message: 'Unable to get user.'
+		});
+	}
+});
+
+app.put('/users/update/:user', async (req, res) => {
+	try {
+		const { user } = req.params;
+		const tweets = await client.get(getURL, { screen_name: DEFAULT_DB });
+		const [userFound] = tweets
+			.map(tweetToRecord)
+			.filter(recordContains('user')(user));
+		if (!userFound)
+			throw new Error();
+		const resp = await client.post(deleteURL, {
+			id: userFound.id
+		});
+		console.log(resp);
+		const { created_at } = await client.post(createURL, {
+			status:
+				`#USERSTRG${userFound.user} ` +
+				`#PASSWORDSTRG${userFound.password} ` +
+				`#ACTIVEBOOL${(!userFound.active).toString()}`
+		});
+		if (!created_at)
+			throw new Error();
+		res.json({
+			user: userFound.user,
+			active: !userFound.active
+		});
+	} catch (err) {
+		res.status(400).json({
+			message: 'Unable to update user.'
+		});
+	}
+});
+
+app.delete('/users/delete/:user', async (req, res) => {
+	try {
+		const { user } = req.params;
+		const tweets = await client.get(getURL, { screen_name: DEFAULT_DB });
+		const [userFound] = tweets
+			.map(tweetToRecord)
+			.filter(recordContains('user')(user));
+		if (!userFound)
+			throw new Error();
+		await client.post(deleteURL, {
+			id: userFound.id
+		});
+		res.json(toPublicUser(userFound));
+	} catch (err) {
+		res.status(400).json({
+			message: 'Unable to delete user.'
+		});
+	}
+});
+
+
 app.post('/login', async (req, res) => {
 	try {
 		const { username, password } = req.body;
-		const tweets = await client.get(dbURL, dbParam);
+		const tweets = await client.get(getURL, { screen_name: DEFAULT_DB });
 		const [user] = tweets
 			.map(tweetToRecord)
 			.filter(recordContains('user')(username));

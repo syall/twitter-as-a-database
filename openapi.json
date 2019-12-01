@@ -22,6 +22,9 @@
     "/users": {
       "get": {
         "summary": "Returns a list of Public Users",
+        "tags": [
+          "Users"
+        ],
         "responses": {
           "200": {
             "description": "A list of Public Users.",
@@ -29,11 +32,12 @@
               "application/json": {
                 "examples": {
                   "steven": {
-                    "value": {
-                      "id": 1,
-                      "user": "steven",
-                      "active": "true"
-                    }
+                    "value": [
+                      {
+                        "user": "steven",
+                        "active": "true"
+                      }
+                    ]
                   }
                 },
                 "schema": {
@@ -62,9 +66,349 @@
         }
       }
     },
+    "/users/search/{query}": {
+      "get": {
+        "summary": "Returns a list of Public Users that start with the Query",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "String to Query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of Public Users that start with the Query.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "steven": {
+                    "value": [
+                      {
+                        "user": "steven",
+                        "active": "true"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Public Users"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "error": {
+                    "value": {
+                      "message": "Unable to get Public Users."
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/active": {
+      "get": {
+        "summary": "Returns a list of Public Users that are active",
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of Public Users that are active.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "steven": {
+                    "value": [
+                      {
+                        "user": "steven",
+                        "active": "true"
+                      }
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Public Users"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "error": {
+                    "value": {
+                      "message": "Unable to get Public Users."
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/create": {
+      "post": {
+        "summary": "Returns Public User created",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "description": "Creation Information",
+          "required": true,
+          "content": {
+            "application/json": {
+              "examples": {
+                "bob": {
+                  "value": {
+                    "user": "bob",
+                    "password": "test"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/Creation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Public User created.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "bob": {
+                    "value": {
+                      "user": "bob",
+                      "active": "true"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Public User"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "error": {
+                    "value": {
+                      "message": "Unable to create user."
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/read/{user}": {
+      "get": {
+        "summary": "Returns Public User",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "User to get"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public User requested.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "steven": {
+                    "value": {
+                      "user": "steven",
+                      "active": "true"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Public User"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "error": {
+                    "value": {
+                      "message": "Unable to get user."
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/update/{user}": {
+      "put": {
+        "summary": "Returns updated Public User.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "User to update"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public User updated.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "steven": {
+                    "value": {
+                      "user": "steven",
+                      "active": "true"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Public User"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "error": {
+                    "value": {
+                      "message": "Unable to update user."
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/delete/{user}": {
+      "delete": {
+        "summary": "Returns deleted Public User",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "User to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public User deleted.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "steven": {
+                    "value": {
+                      "user": "steven",
+                      "active": "true"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Public User"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "error": {
+                    "value": {
+                      "message": "Unable to delete user."
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
-        "summary": "Authenticate a User",
+        "summary": "Authenticates a User",
+        "tags": [
+          "Authentication"
+        ],
         "requestBody": {
           "description": "Login Information",
           "required": true,
@@ -134,16 +478,12 @@
         "type": "object",
         "required": [
           "username",
-          "id",
           "password",
           "active"
         ],
         "properties": {
           "username": {
             "type": "string"
-          },
-          "id": {
-            "type": "number"
           },
           "password": {
             "type": "string"
@@ -157,15 +497,11 @@
         "type": "object",
         "required": [
           "username",
-          "id",
           "active"
         ],
         "properties": {
           "username": {
             "type": "string"
-          },
-          "id": {
-            "type": "number"
           },
           "active": {
             "type": "boolean"
@@ -211,6 +547,21 @@
         ],
         "properties": {
           "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Creation": {
+        "type": "object",
+        "require": [
+          "user",
+          "password"
+        ],
+        "properties": {
+          "user": {
+            "type": "string"
+          },
+          "password": {
             "type": "string"
           }
         }
