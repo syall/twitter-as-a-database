@@ -1,0 +1,220 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "twitter-as-a-database",
+    "description": "Using Twitter as a Database as a hobby project!",
+    "externalDocs": {
+      "description": "GitHub Repository",
+      "url": "https://github.com/syall/Twitter-as-a-Database"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "development"
+    }
+  ],
+  "paths": {
+    "/users": {
+      "get": {
+        "summary": "Returns a list of Public Users",
+        "responses": {
+          "200": {
+            "description": "A list of Public Users.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "steven": {
+                    "value": {
+                      "id": 1,
+                      "user": "steven",
+                      "active": "true"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Public Users"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "error": {
+                    "value": {
+                      "message": "Unable to get Public Users."
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "summary": "Authenticate a User",
+        "requestBody": {
+          "description": "Login Information",
+          "required": true,
+          "content": {
+            "application/json": {
+              "examples": {
+                "steven": {
+                  "value": {
+                    "username": "steven",
+                    "password": "test123"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication Successful!",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "steven": {
+                    "value": {
+                      "message": "Authentication Successful!"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Login Success"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "userNotFound": {
+                    "value": {
+                      "message": "User not found."
+                    }
+                  },
+                  "passwordIncorrect": {
+                    "value": {
+                      "message": "Password Incorrect."
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "required": [
+          "username",
+          "id",
+          "password",
+          "active"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "password": {
+            "type": "string"
+          },
+          "active": {
+            "type": "active"
+          }
+        }
+      },
+      "Public User": {
+        "type": "object",
+        "required": [
+          "username",
+          "id",
+          "active"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Public Users": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Public User"
+        }
+      },
+      "Login": {
+        "type": "object",
+        "require": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "Login Success": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

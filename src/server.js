@@ -1,8 +1,16 @@
 const express = require('express');
 const twitter = require('twitter');
 const bodyParser = require('body-parser');
-const { name, version } = require('../package.json');
+const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
+
+const {
+	name,
+	version,
+	description,
+	author,
+	license,
+} = require('../package.json');
 
 const app = new express();
 
@@ -77,12 +85,12 @@ app.get('/users', async (req, res) => {
 		res.json(users.map(toPublicUser));
 	} catch (err) {
 		res.status(400).json({
-			message: err.message
+			message: 'Unable to get Public Users.'
 		});
 	}
 });
 
-app.get('/login', async (req, res) => {
+app.post('/login', async (req, res) => {
 	try {
 		const { username, password } = req.body;
 		const tweets = await client.get(dbURL, dbParam);
@@ -103,10 +111,9 @@ app.get('/login', async (req, res) => {
 	}
 });
 
-app.get('*', (req, res) => res.json({
-	service: `${name} ${version}`,
-	routes: [
-		`/users`,
-		`/login`,
-	],
-}));
+const swaggerDocument = require('../openapi.json');
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+app.get('*', (req, res) =>
+	res.redirect(`http://${HOST}:${PORT}/docs`)
+);

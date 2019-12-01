@@ -4,7 +4,7 @@
   "description": "Using Twitter as a Database",
   "repository": "https://github.com/syall/Twitter-as-a-Database",
   "main": "src/server.js",
-  "author": "Steven Yuan",
+  "author": "Steven Yuan (syall)",
   "license": "MIT",
   "scripts": {
     "start": "node src/server.js",
@@ -15,6 +15,7 @@
     "body-parser": "^1.19.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "swagger-ui-express": "^4.1.2",
     "twitter": "^1.7.1"
   },
   "devDependencies": {
