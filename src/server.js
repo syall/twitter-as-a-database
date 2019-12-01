@@ -2,13 +2,13 @@ const express = require('express');
 const twitter = require('twitter');
 const bodyParser = require('body-parser');
 const swaggerUi = require('swagger-ui-express');
-require('dotenv').config();
-
+const morgan = require('morgan');
 const { name } = require('../package.json');
+require('dotenv').config();
+const { HOST, PORT } = process.env;
 
 const app = new express();
 
-const { HOST, PORT } = process.env;
 app.listen(PORT, () => {
 	console.log(`${name} running on http://${HOST}:${PORT}`);
 });
@@ -18,6 +18,8 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.use(bodyParser.json());
+
+app.use(morgan('dev'));
 
 const {
 	CONSUMER_PUBLIC_KEY: consumer_key,
@@ -128,13 +130,13 @@ app.post('/users/create', async (req, res) => {
 			.filter(recordContains('user')(user));
 		if (userFound)
 			throw new Error();
-		const { created_at } = await client.post(createURL, {
+		const { created_at: posted } = await client.post(createURL, {
 			status:
 				`#USERSTRG${user} ` +
 				`#PASSWORDSTRG${password} ` +
 				`#ACTIVEBOOLtrue`
 		});
-		if (!created_at)
+		if (!posted)
 			throw new Error();
 		res.json({ user, active: true });
 	} catch (err) {
@@ -170,17 +172,18 @@ app.put('/users/update/:user', async (req, res) => {
 			.filter(recordContains('user')(user));
 		if (!userFound)
 			throw new Error();
-		const resp = await client.post(deleteURL, {
+		const { created_at: deleted } = await client.post(deleteURL, {
 			id: userFound.id
 		});
-		console.log(resp);
-		const { created_at } = await client.post(createURL, {
+		if (!deleted)
+			throw new Error();
+		const { created_at: posted } = await client.post(createURL, {
 			status:
 				`#USERSTRG${userFound.user} ` +
 				`#PASSWORDSTRG${userFound.password} ` +
 				`#ACTIVEBOOL${(!userFound.active).toString()}`
 		});
-		if (!created_at)
+		if (!posted)
 			throw new Error();
 		res.json({
 			user: userFound.user,
@@ -212,7 +215,6 @@ app.delete('/users/delete/:user', async (req, res) => {
 		});
 	}
 });
-
 
 app.post('/login', async (req, res) => {
 	try {
