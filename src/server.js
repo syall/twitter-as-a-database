@@ -20,8 +20,6 @@ app.listen(PORT, () => {
 	console.log(`${name} running on http://${HOST}:${PORT}`);
 });
 
-app.use(/^\/((health)|(ping))$/, (req, res) => res.send('PTL!'));
-
 const users = require('./routes/users');
 app.use('/users', users);
 
@@ -36,6 +34,8 @@ app.use(
 		customCss: '.swagger-ui .topbar { display: none; }'
 	})
 );
+
+app.get(/^\/((health)|(ping))$/, (req, res) => res.send('PTL!'));
 
 app.get('*', (req, res) =>
 	res.redirect(`http://${HOST}:${PORT}/docs`)
