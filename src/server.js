@@ -26,17 +26,14 @@ app.use('/users', users);
 const auth = require('./routes/auth');
 app.use('/auth', auth);
 
-const swaggerDocument = require('../openapi.json');
-app.use(
-	'/docs',
-	swaggerUi.serve,
-	swaggerUi.setup(swaggerDocument, options = {
-		customCss: '.swagger-ui .topbar { display: none; }'
-	})
-);
+app.use(/^\/((health)|(ping))$/, (req, res) => res.send('PTL!'));
 
-app.get(/^\/((health)|(ping))$/, (req, res) => res.send('PTL!'));
+const contract = require('../openapi.json');
+const options = {
+	customSiteTitle: "Twitter as a Database",
+	customfavIcon: "../assets/favicon.ico",
+	customCss: '.swagger-ui .topbar { display: none; }',
+};
 
-app.get('*', (req, res) =>
-	res.redirect(`http://${HOST}:${PORT}/docs`)
-);
+app.use('/assets', express.static('assets'));
+app.use('/', swaggerUi.serve, swaggerUi.setup(contract, options));
