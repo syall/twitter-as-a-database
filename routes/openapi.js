@@ -2,7 +2,7 @@ const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const router = express.Router();
 
-const contract = require('../openapi.json');
+const contract = require('../config/openapi.json');
 
 const options = {
 	customSiteTitle: 'Twitter as a Database',

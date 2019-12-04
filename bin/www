@@ -1,57 +1,54 @@
-const http = require('http');
+const { config } = require('dotenv');
+const path = require("path");
+const fs = require('fs');
 
-require('dotenv').config();
+const { parsed } = config();
+const { PORT, SSL_ENABLED, HOST: host } = parsed;
+const port = normalizePort(PORT || 3000);
+const ssl = SSL_ENABLED === 'true';
+
 const app = require('../app');
-const port = normalizePort(process.env.PORT || 3000);
 app.set('port', port);
 
-const server = http.createServer(app);
+const configPath = path.resolve(__dirname, '../config/host');
+const server = ssl
+	? require('https').createServer({
+		key: fs.readFileSync(`${configPath}.key`),
+		cert: fs.readFileSync(`${configPath}.cert`),
+	}, app)
+	: require('http').createServer(app);
+
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 process.on('SIGTERM', onHandleSignal);
 process.on('SIGINT', onHandleSignal);
 
-function normalizePort(val) {
-	const port = parseInt(val, 10);
+function normalizePort(value) {
+	const port = parseInt(value, 10);
 	if (isNaN(port))
-		return val;
+		return value;
 	if (port >= 0)
 		return port;
 	return false;
 }
 
 function onError(error) {
-	if (error.syscall !== 'listen')
+	if (error.code !== 'EADDRINUSE')
 		throw error;
-	const bind = typeof port === 'string' ?
-		`Pipe ${port}` :
-		`Port ${port}`;
-	switch (error.code) {
-		case 'EACCES':
-			console.error(`${bind} requires elevated privileges`);
-			process.exit(1);
-		case 'EADDRINUSE':
-			console.error(`${bind} is already in use`);
-			process.exit(1);
-		default:
-			throw error;
-	}
+	console.error(`${port} is already in use`);
+	process.exit(1);
 }
 
-const { name } = require('../package.json');
 function onListening() {
-	const addr = server.address();
-	const bind = typeof addr === 'string' ?
-		`pipe ${addr}` :
-		`port ${addr.port}`;
-	console.log(`${name} listening on ${bind}`);
+	const { name } = require('../package.json');
+	console.log(`${name} at http${ssl ? 's' : ''}://${host}:${port}`);
 }
 
 function onHandleSignal() {
-	console.log('handling SIGTERM | SIGINT');
+	console.log('\nHandling Interrupts...');
 	server.close(() => {
-		console.log('orderly shutdown');
+		console.log('Orderly Shutdown...');
 		process.exit(0);
 	});
 }
