@@ -66,7 +66,7 @@
         }
       }
     },
-    "/users/search/{query}": {
+    "/users/search": {
       "get": {
         "summary": "Returns a list of Public Users that start with the Query",
         "tags": [
@@ -74,18 +74,25 @@
         ],
         "parameters": [
           {
-            "in": "path",
-            "name": "query",
+            "in": "query",
+            "name": "user",
             "schema": {
               "type": "string"
             },
-            "required": true,
-            "description": "String to Query"
+            "description": "Users starts with user"
+          },
+          {
+            "in": "query",
+            "name": "active",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Users that are active"
           }
         ],
         "responses": {
           "200": {
-            "description": "A list of Public Users that start with the Query.",
+            "description": "A list of Public Users that fulfill query parameters.",
             "content": {
               "application/json": {
                 "examples": {
