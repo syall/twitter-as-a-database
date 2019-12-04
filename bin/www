@@ -1,0 +1,10 @@
+require('dotenv').config();
+
+const app = require('../src/server');
+
+const { HOST, PORT } = process.env;
+const { name } = require('../package.json');
+
+app.listen(PORT, () => {
+	console.log(`${name} running on http://${HOST}:${PORT}`);
+});

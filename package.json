@@ -7,8 +7,8 @@
   "author": "Steven Yuan (syall)",
   "license": "MIT",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon -x 'clear;node' src/server.js",
+    "start": "node bin/www",
+    "dev": "nodemon -x 'clear;node' bin/www",
     "test": "true"
   },
   "dependencies": {
