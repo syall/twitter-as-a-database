@@ -4,6 +4,13 @@ const router = express.Router();
 
 const contract = require('../config/openapi.json');
 
+const {HOST, PORT, SSL_ENABLED} = process.env;
+const ssl = SSL_ENABLED === 'true';
+contract.servers = [{
+	url: `http${ssl ? 's' : ''}://${HOST}:${PORT}`,
+	description: 'development',
+}];
+
 const options = {
 	customSiteTitle: 'Twitter as a Database',
 	customfavIcon: '/public/favicon.ico',
