@@ -2,12 +2,21 @@
 
 Implementing an extrememly crude DBMS that deals with:
 
-* Data Inconsistencies
-* Multiple Tables
-* Primary Keys and Foreign Keys
-* Basic Atomic Values/Types
+* Basic Atomic Values with Types
+* ACID Properties
+* Visibility (Public and Secret)
 
-Requires a .env file:
+## Installation
+
+Generate a host.key and host.cert file in the config folder:
+
+```bash
+openssl genrsa 2048 > host.key
+chmod 400 host.key
+openssl req -new -x509 -nodes -sha256 -days 365 -key host.key -out host.cert
+```
+
+Configure a dotenv file in the root folder:
 
 ```bash
 # Hosting Variables
@@ -22,4 +31,7 @@ ACCESS_SECRET_KEY
 
 # Default Database screen_name
 DEFAULT_DB
+
+# SSL
+SSL_ENABLED
 ```
