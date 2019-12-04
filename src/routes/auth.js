@@ -17,7 +17,7 @@ router.post('/login', async (req, res) => {
 			.filter(recordContains('user')(username));
 		if (!user)
 			throw new Error('User not found.');
-		if (password.localeCompare(user.password))
+		if (password.localeCompare(user.password.value))
 			throw new Error('Password incorrect.');
 		res.json({
 			message: 'Authentication Successful!'

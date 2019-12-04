@@ -65,9 +65,9 @@ router.post('/create', async (req, res) => {
 			throw new Error();
 		const { created_at: posted } = await client.post(URLS.create, {
 			status:
-				`#USERSTRG${user} ` +
-				`#PASSWORDSTRG${password} ` +
-				`#ACTIVEBOOLtrue`
+				`#USERPUBLICSTRG${user} ` +
+				`#PASSWORDSECRETSTRG${password} ` +
+				`#ACTIVEPUBLICBOOLtrue`
 		});
 		if (!posted)
 			throw new Error();
@@ -106,24 +106,23 @@ router.put('/update/:user', async (req, res) => {
 		if (!userFound)
 			throw new Error();
 		const { created_at: deleted } = await client.post(URLS.delete, {
-			id: userFound.id
+			id: userFound.id.value
 		});
 		if (!deleted)
 			throw new Error();
 		const { created_at: posted } = await client.post(URLS.create, {
 			status:
-				`#USERSTRG${userFound.user} ` +
-				`#PASSWORDSTRG${userFound.password} ` +
-				`#ACTIVEBOOL${(!userFound.active).toString()}`
+				`#USERPUBLICSTRG${userFound.user.value} ` +
+				`#PASSWORDSECRETSTRG${userFound.password.value} ` +
+				`#ACTIVEPUBLICBOOL${(!userFound.active.value).toString()}`
 		});
 		if (!posted)
 			throw new Error();
 		res.json({
-			user: userFound.user,
-			active: !userFound.active
+			user: userFound.user.value,
+			active: !userFound.active.value
 		});
 	} catch (err) {
-		console.log(err);
 		res.status(400).json({
 			message: 'Unable to update user.'
 		});
@@ -140,7 +139,7 @@ router.delete('/delete/:user', async (req, res) => {
 		if (!userFound)
 			throw new Error();
 		await client.post(URLS.delete, {
-			id: userFound.id
+			id: userFound.id.value
 		});
 		res.json(toPublicUser(userFound));
 	} catch (err) {
