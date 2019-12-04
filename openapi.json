@@ -403,7 +403,7 @@
         }
       }
     },
-    "/login": {
+    "/auth/login": {
       "post": {
         "summary": "Authenticates a User",
         "tags": [
