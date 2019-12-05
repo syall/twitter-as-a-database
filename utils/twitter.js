@@ -95,6 +95,7 @@ const client = new twitter({
 });
 
 const URLS = {
+	base: 'https://api.twitter.com/1.1/',
 	get: 'statuses/user_timeline',
 	delete: 'statuses/destroy',
 	create: 'statuses/update',
