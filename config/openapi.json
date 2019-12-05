@@ -21,23 +21,40 @@
   "paths": {
     "/users": {
       "get": {
-        "summary": "Returns a list of Public Users",
+        "summary": "Returns a list of Public Users or Returns a Specific User",
         "tags": [
           "Users"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "user",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "User to Get"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "A list of Public Users.",
+            "description": "A List of Public Users or a Single User",
             "content": {
               "application/json": {
                 "examples": {
-                  "steven": {
+                  "List": {
                     "value": [
                       {
                         "user": "steven",
                         "active": "true"
                       }
                     ]
+                  },
+                  "Single": {
+                    "value": {
+                      "user": "steven",
+                      "active": "true"
+                    }
                   }
                 },
                 "schema": {
@@ -51,9 +68,14 @@
             "content": {
               "application/json": {
                 "examples": {
-                  "error": {
+                  "List Error": {
                     "value": {
                       "message": "Unable to get Public Users."
+                    }
+                  },
+                  "Single Error": {
+                    "value": {
+                      "message": "Unable to get Public User."
                     }
                   }
                 },
@@ -68,7 +90,7 @@
     },
     "/users/search": {
       "get": {
-        "summary": "Returns a list of Public Users that start with the Query",
+        "summary": "Returns a list of Public Users that match the Query",
         "tags": [
           "Users"
         ],
@@ -81,16 +103,20 @@
             },
             "style": "form",
             "explode": true,
-            "description": "Users starts with user",
-            "example": {
-              "user": "s",
-              "active": false
+            "description": "Query for Columns of Public Users",
+            "examples": {
+              "user s and active false": {
+                "value": {
+                  "user": "s",
+                  "active": false
+                }
+              }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "A list of Public Users that fulfill query parameters.",
+            "description": "A list of Public Users that match the Query",
             "content": {
               "application/json": {
                 "examples": {
@@ -131,7 +157,7 @@
     },
     "/users/create": {
       "post": {
-        "summary": "Returns Public User created",
+        "summary": "Returns created Public User",
         "tags": [
           "Users"
         ],
@@ -145,18 +171,18 @@
                   "value": {
                     "user": {
                       "value": "bob",
-                      "type": "STRG",
-                      "visibility": "PUBLIC"
+                      "type": "strg",
+                      "visibility": "public"
                     },
                     "password": {
                       "value": "test",
-                      "type": "STRG",
-                      "visibility": "SECRET"
+                      "type": "strg",
+                      "visibility": "secret"
                     },
                     "active": {
                       "value": "true",
-                      "type": "BOOL",
-                      "visibility": "PUBLIC"
+                      "type": "bool",
+                      "visibility": "public"
                     }
                   }
                 }
@@ -169,7 +195,7 @@
         },
         "responses": {
           "200": {
-            "description": "Public User created.",
+            "description": "Public User created",
             "content": {
               "application/json": {
                 "examples": {
@@ -206,65 +232,9 @@
         }
       }
     },
-    "/users/find/{user}": {
-      "get": {
-        "summary": "Returns Public User",
-        "tags": [
-          "Users"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "user",
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "description": "User to get"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Public User requested.",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "steven": {
-                    "value": {
-                      "user": "steven",
-                      "active": "true"
-                    }
-                  }
-                },
-                "schema": {
-                  "$ref": "#/components/schemas/Public User"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "error": {
-                    "value": {
-                      "message": "Unable to get user."
-                    }
-                  }
-                },
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/users/update/{user}": {
       "put": {
-        "summary": "Returns updated Public User.",
+        "summary": "Returns updated Public User",
         "tags": [
           "Users"
         ],
@@ -285,12 +255,12 @@
           "content": {
             "application/json": {
               "examples": {
-                "steven": {
+                "trust": {
                   "value": {
                     "trust": {
-                      "visibility": "PUBLIC",
+                      "visibility": "public",
                       "value": true,
-                      "type": "BOOL"
+                      "type": "bool"
                     }
                   }
                 }
@@ -303,7 +273,7 @@
         },
         "responses": {
           "200": {
-            "description": "Public User updated.",
+            "description": "Public User updated",
             "content": {
               "application/json": {
                 "examples": {
@@ -359,7 +329,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Public User deleted.",
+            "description": "Public User deleted",
             "content": {
               "application/json": {
                 "examples": {
@@ -444,12 +414,12 @@
             "content": {
               "application/json": {
                 "examples": {
-                  "userNotFound": {
+                  "User not found": {
                     "value": {
                       "message": "User not found."
                     }
                   },
-                  "passwordIncorrect": {
+                  "Password Incorrect": {
                     "value": {
                       "message": "Password Incorrect."
                     }
@@ -501,7 +471,7 @@
       },
       "Login": {
         "type": "object",
-        "require": [
+        "required": [
           "username",
           "password"
         ],

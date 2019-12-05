@@ -15,12 +15,24 @@ const { DEFAULT_DB } = process.env;
 router.get('/', async (req, res) => {
 	try {
 		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
-		const users = tweets.map(tweetToRecord);
-		res.json(users.map(toPublicUser));
+		const { user } = req.query;
+		const users = user
+			? tweets
+				.map(tweetToRecord)
+				.filter(recordContains('user')(user))
+				.map(toPublicUser)
+			: tweets
+				.map(tweetToRecord)
+				.map(toPublicUser);
+		if (user && users.length === 0)
+			throw new Error('single');
+		res.json(user ? users[0] : users);
 	} catch (err) {
 		console.trace(err);
 		res.status(400).json({
-			message: 'Unable to get Public Users.'
+			message: `Unable to get Public User${err.message !== 'single'
+				? 's'
+				: ''}.`
 		});
 	}
 });
@@ -31,7 +43,7 @@ router.get('/search', async (req, res) => {
 			.map(tweetToRecord);
 		for (const [k, v] of Object.entries(req.query))
 			users = users.filter(u => u[k]
-				? u[k].visibility === 'PUBLIC'
+				? u[k].visibility === 'public'
 					? u[k].value.toString().startsWith(v)
 					: false
 				: false
@@ -48,8 +60,8 @@ router.get('/search', async (req, res) => {
 router.post('/create', async (req, res) => {
 	try {
 		const { user, password } = req.body;
-		if (!user || user.visibility !== 'PUBLIC' ||
-			!password || password.visibility !== 'SECRET')
+		if (!user || user.visibility !== 'public' ||
+			!password || password.visibility !== 'secret')
 			throw new Error();
 
 		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
@@ -67,10 +79,10 @@ router.post('/create', async (req, res) => {
 				throw new Error();
 			if (v.value === null)
 				throw new Error();
-			if (!Number(v.value.toString()) && v.type === 'NUMB')
+			if (!Number(v.value.toString()) && v.type === 'numb')
 				throw new Error();
 			const fLetter = v.value.toString()[0];
-			if (!Number(fLetter) && v.type !== 'NUMB' &&
+			if (!Number(fLetter) && v.type !== 'numb' &&
 				fLetter.toUpperCase() === fLetter)
 				throw new Error();
 			if (properValue(v)) {
@@ -96,24 +108,6 @@ router.post('/create', async (req, res) => {
 	}
 });
 
-router.get('/find/:user', async (req, res) => {
-	try {
-		const { user } = req.params;
-		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
-		const [userFound] = tweets
-			.map(tweetToRecord)
-			.filter(recordContains('user')(user));
-		if (!userFound)
-			throw new Error();
-		res.json(toPublicUser(userFound));
-	} catch (err) {
-		console.trace(err);
-		res.status(400).json({
-			message: 'Unable to get user.'
-		});
-	}
-});
-
 router.put('/update/:user', async (req, res) => {
 	try {
 		const { user } = req.params;
@@ -131,17 +125,17 @@ router.put('/update/:user', async (req, res) => {
 			if (k === 'user')
 				throw new Error();
 			if (v.value !== null) {
-				if (!Number(v.value.toString()) && v.type === 'NUMB')
+				if (!Number(v.value.toString()) && v.type === 'numb')
 					throw new Error();
 				const fLetter = v.value.toString()[0];
-				if (!Number(fLetter) && v.type !== 'NUMB' &&
+				if (!Number(fLetter) && v.type !== 'numb' &&
 					fLetter.toUpperCase() === fLetter)
 					throw new Error();
 			}
 			if (userFound[k]) {
 				if (userFound[k].type !== v.type)
 					throw new Error();
-				if (userFound[k].visibility === 'SECRET')
+				if (userFound[k].visibility === 'secret')
 					throw new Error();
 				if (v.value === null) {
 					delete userFound[k];
