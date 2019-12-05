@@ -43,7 +43,8 @@ router.get('/search', async (req, res) => {
 router.post('/create', async (req, res) => {
 	try {
 		const { user, password } = req.body;
-		if (!user || !password)
+		if (!user || user.visibility !== 'PUBLIC' ||
+			!password || password.visibility !== 'SECRET')
 			throw new Error();
 
 		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
