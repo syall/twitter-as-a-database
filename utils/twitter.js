@@ -63,6 +63,12 @@ const toPublicUser = u => {
 const recordContains = field => value => record =>
 	record[field].value === value;
 
+const hashtagify = ([column, value]) => (`#` +
+	`${column.toUpperCase()}` +
+	`${value.visibility.toUpperCase()}` +
+	`${value.type.toUpperCase()}` +
+	`${value.value}`);
+
 const {
 	CONSUMER_PUBLIC_KEY: consumer_key,
 	CONSUMER_SECRET_KEY: consumer_secret,
@@ -91,5 +97,6 @@ module.exports = {
 	userIsActive,
 	toPublicUser,
 	recordContains,
+	hashtagify,
 	URLS,
 };

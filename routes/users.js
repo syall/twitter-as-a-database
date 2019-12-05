@@ -5,6 +5,7 @@ const {
 	tweetToRecord,
 	toPublicUser,
 	recordContains,
+	hashtagify,
 	URLS,
 } = require('../utils/twitter');
 const { DEFAULT_DB } = process.env;
@@ -66,7 +67,7 @@ router.post('/create', async (req, res) => {
 	}
 });
 
-router.get('/read/:user', async (req, res) => {
+router.get('/find/:user', async (req, res) => {
 	try {
 		const { user } = req.params;
 		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
@@ -87,29 +88,61 @@ router.put('/update/:user', async (req, res) => {
 	try {
 		const { user } = req.params;
 		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
+
 		const [userFound] = tweets
 			.map(tweetToRecord)
 			.filter(recordContains('user')(user));
 		if (!userFound)
 			throw new Error();
-		const { created_at: deleted } = await client.post(URLS.delete, {
-			id: userFound.id.value
-		});
-		if (!deleted)
-			throw new Error();
-		const { created_at: posted } = await client.post(URLS.create, {
-			status:
-				`#USERPUBLICSTRG${userFound.user.value} ` +
-				`#PASSWORDSECRETSTRG${userFound.password.value} ` +
-				`#ACTIVEPUBLICBOOL${(!userFound.active.value).toString()}`
-		});
+
+		const id = userFound.id.value;
+		delete userFound.id;
+		for (const [k, v] of Object.entries(req.body)) {
+			if (
+				!userFound[k] &&
+				v.hasOwnProperty('type') &&
+				v.hasOwnProperty('visibility') &&
+				v.hasOwnProperty('value') &&
+				Object.keys(v).length === 3
+			) {
+				userFound[k] = v;
+				continue;
+			}
+			if (userFound[k].type !== v.type)
+				throw new Error();
+			if (userFound[k].visibility === 'SECRET')
+				throw new Error();
+			if (k === 'user')
+				throw new Error();
+			if (v.value === null) {
+				delete userFound[k];
+				continue;
+			}
+			const firstLetter = v.value.toString()[0];
+			if (firstLetter >= '0' && firstLetter <= '9' &&
+				firstLetter.toUpperCase() === firstLetter)
+				throw new Error();
+			userFound[k].value = v.value;
+		}
+
+		const newTweet = [];
+		for (const [k, v] of Object.entries(userFound))
+			newTweet.push(hashtagify([k, v]));
+
+		const { created_at: posted } =
+			await client.post(URLS.create, {
+				status: newTweet.join(' ')
+			});
 		if (!posted)
 			throw new Error();
-		res.json({
-			user: userFound.user.value,
-			active: !userFound.active.value
-		});
+
+		const { created_at: deleted } = await client.post(URLS.delete, { id });
+		if (!deleted)
+			throw new Error();
+
+		res.json([userFound].map(toPublicUser)[0]);
 	} catch (err) {
+		console.log(err);
 		res.status(400).json({
 			message: 'Unable to update user.'
 		});

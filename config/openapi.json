@@ -189,7 +189,7 @@
         }
       }
     },
-    "/users/read/{user}": {
+    "/users/find/{user}": {
       "get": {
         "summary": "Returns Public User",
         "tags": [
@@ -262,6 +262,28 @@
             "description": "User to update"
           }
         ],
+        "requestBody": {
+          "description": "Update Information",
+          "required": true,
+          "content": {
+            "application/json": {
+              "examples": {
+                "steven": {
+                  "value": {
+                    "trust": {
+                      "visibility": "PUBLIC",
+                      "value": true,
+                      "type": "BOOL"
+                    }
+                  }
+                }
+              },
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Public User updated.",
@@ -432,8 +454,7 @@
         "type": "object",
         "required": [
           "username",
-          "password",
-          "active"
+          "password"
         ],
         "properties": {
           "username": {
@@ -441,24 +462,17 @@
           },
           "password": {
             "type": "string"
-          },
-          "active": {
-            "type": "active"
           }
         }
       },
       "Public User": {
         "type": "object",
         "required": [
-          "username",
-          "active"
+          "username"
         ],
         "properties": {
           "username": {
             "type": "string"
-          },
-          "active": {
-            "type": "boolean"
           }
         }
       },
@@ -507,7 +521,7 @@
       },
       "Creation": {
         "type": "object",
-        "require": [
+        "required": [
           "user",
           "password"
         ],
