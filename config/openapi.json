@@ -81,7 +81,11 @@
             },
             "style": "form",
             "explode": true,
-            "description": "Users starts with user"
+            "description": "Users starts with user",
+            "example": {
+              "user": "s",
+              "active": false
+            }
           }
         ],
         "responses": {

@@ -45,21 +45,44 @@ router.post('/create', async (req, res) => {
 		const { user, password } = req.body;
 		if (!user || !password)
 			throw new Error();
+
 		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
+
 		const [userFound] = tweets
 			.map(tweetToRecord)
 			.filter(recordContains('user')(user));
 		if (userFound)
 			throw new Error();
-		const { created_at: posted } = await client.post(URLS.create, {
-			status:
-				`#USERPUBLICSTRG${user} ` +
-				`#PASSWORDSECRETSTRG${password} ` +
-				`#ACTIVEPUBLICBOOLtrue`
-		});
+
+		const newTweet = [];
+		const userToAdd = {};
+		for (const [k, v] of Object.entries(req.body)) {
+			if (userToAdd[k])
+				throw new Error();
+			const firstLetter = v.value.toString()[0];
+			if (!(firstLetter >= '0' && firstLetter <= '9') &&
+				firstLetter.toUpperCase() === firstLetter)
+				throw new Error();
+			if (
+				v.hasOwnProperty('type') &&
+				v.hasOwnProperty('visibility') &&
+				v.hasOwnProperty('value') &&
+				Object.keys(v).length === 3
+			) {
+				userToAdd[k] = v;
+				newTweet.push(hashtagify([k, v]));
+			}
+			else throw new Error();
+		}
+
+		const { created_at: posted } =
+			await client.post(URLS.create, {
+				status: newTweet.join(' ')
+			});
 		if (!posted)
 			throw new Error();
-		res.json({ user, active: true });
+
+		res.json([userToAdd].map(toPublicUser)[0]);
 	} catch (err) {
 		res.status(400).json({
 			message: 'Unable to create user.'
@@ -98,6 +121,23 @@ router.put('/update/:user', async (req, res) => {
 		const id = userFound.id.value;
 		delete userFound.id;
 		for (const [k, v] of Object.entries(req.body)) {
+
+			if (v.value !== null && !Number(v.value.toString()) && v.type === 'NUMB')
+				throw new Error();
+			const fLetter = v.value !== null && v.value.toString()[0];
+			if (v.value !== null && !(fLetter >= '0' && fLetter <= '9') &&
+				v.type !== 'NUMB' && fLetter.toUpperCase() === fLetter)
+				throw new Error();
+			if (userFound[k] && userFound[k].type !== v.type)
+				throw new Error();
+			if (userFound[k] && userFound[k].visibility === 'SECRET')
+				throw new Error();
+			if (k === 'user')
+				throw new Error();
+			if (userFound[k] && v.value === null) {
+				delete userFound[k];
+				continue;
+			}
 			if (
 				!userFound[k] &&
 				v.hasOwnProperty('type') &&
@@ -108,20 +148,6 @@ router.put('/update/:user', async (req, res) => {
 				userFound[k] = v;
 				continue;
 			}
-			if (userFound[k].type !== v.type)
-				throw new Error();
-			if (userFound[k].visibility === 'SECRET')
-				throw new Error();
-			if (k === 'user')
-				throw new Error();
-			if (v.value === null) {
-				delete userFound[k];
-				continue;
-			}
-			const firstLetter = v.value.toString()[0];
-			if (firstLetter >= '0' && firstLetter <= '9' &&
-				firstLetter.toUpperCase() === firstLetter)
-				throw new Error();
 			userFound[k].value = v.value;
 		}
 
