@@ -58,7 +58,7 @@ const toPublicUser = u => {
 const onePublicUser = u => [u].map(toPublicUser)[0];
 
 const recordContains = field => value => record =>
-	record[field].value === value.value;
+	record[field].value === value;
 
 const hashtagify = ([column, value]) => (`#` +
 	`${column.toUpperCase()}` +
