@@ -4,10 +4,10 @@ const router = express.Router();
 
 const contract = require('../config/openapi.json');
 
-const {HOST, PORT, SSL_ENABLED} = process.env;
-const ssl = SSL_ENABLED === 'true';
+const { HOST, PORT, SSL_ENABLED } = process.env;
+const ssl = SSL_ENABLED == 'true' ? 's' : '';
 contract.servers = [{
-	url: `http${ssl ? 's' : ''}://${HOST}:${PORT}`,
+	url: `http${ssl}://${HOST}:${PORT}`,
 	description: 'development',
 }];
 

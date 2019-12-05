@@ -1,21 +1,22 @@
 module.exports = {
   collectCoverage: false,
   collectCoverageFrom: [
-    './{routes,utils}/*.js'
+    './{routes,utils}/*.js',
+    '!./routes/openapi.js'
   ],
-  coverageDirectory: "coverage",
+  coverageDirectory: 'coverage',
   coveragePathIgnorePatterns: [
-    "/node_modules/"
+    '/node_modules/'
   ],
   coverageReporters: [
-    "json",
-    "text",
-    "lcov",
-    "clover"
+    'json',
+    'text',
+    'lcov',
+    'clover'
   ],
-  testEnvironment: "node",
+  testEnvironment: 'node',
   testPathIgnorePatterns: [
-    "/node_modules/"
+    '/node_modules/'
   ],
   verbose: true
 };

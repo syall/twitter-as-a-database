@@ -1,52 +1,58 @@
+const typeOf = attr =>
+	attr.substring(attr.length - 4)
+		.toLowerCase();
+
+const visibilityOf = attr =>
+	attr.substring(attr.length - 10, attr.length - 4)
+		.toLowerCase();
+
+const field = attr =>
+	attr.substring(0, attr.length - 10)
+		.toLowerCase();
+
+const parseHashtag = ret => hashtag => {
+	const [attr] = hashtag.text.match(/^[A-Z]+/g);
+	const [value] = hashtag.text.match(/[a-z0-9][a-z0-9A-Z]*$/g);
+	const type = typeOf(attr);
+	const visibility = visibilityOf(attr);
+	switch (type) {
+		case 'strg':
+			ret[field(attr)] = {
+				value,
+				type,
+				visibility,
+			};
+			break;
+		case 'bool':
+			ret[field(attr)] = {
+				value: value === 'true',
+				type,
+				visibility,
+			};
+			break;
+		case 'numb':
+			ret[field(attr)] = {
+				value: Number.parseInt(value),
+				type,
+				visibility,
+			};
+			break;
+		default:
+			break;
+	}
+	return ret;
+};
+
 const tweetToRecord = tweet => {
-	const typeOf = attr =>
-		attr.substring(attr.length - 4)
-			.toLowerCase();
-	const visibilityOf = attr =>
-		attr.substring(attr.length - 10, attr.length - 4)
-			.toLowerCase();
-	const field = attr =>
-		attr.substring(0, attr.length - 10)
-			.toLowerCase();
-	const parseHashtag = hashtag => {
-		const [attr] = hashtag.text.match(/^[A-Z]+/g);
-		const [value] = hashtag.text.match(/[a-z0-9][a-z0-9A-Z]*$/g);
-		const type = typeOf(attr);
-		const visibility = visibilityOf(attr);
-		switch (type) {
-			case 'strg':
-				ret[field(attr)] = {
-					value,
-					type,
-					visibility,
-				};
-				break;
-			case 'bool':
-				ret[field(attr)] = {
-					value: value === 'true',
-					type,
-					visibility,
-				};
-				break;
-			case 'numb':
-				ret[field(attr)] = {
-					value: Number.parseInt(value),
-					type,
-					visibility,
-				};
-				break;
-			default:
-				break;
-		}
-	};
-	const ret = {
+	let ret = {
 		id: {
 			value: tweet.id_str,
 			type: 'strg',
 			visibility: 'secret'
 		}
 	};
-	tweet.entities.hashtags.forEach(parseHashtag);
+	for (const hashtag of tweet.entities.hashtags)
+		ret = parseHashtag(ret)(hashtag);
 	return ret;
 };
 
@@ -57,8 +63,6 @@ const toPublicUser = u => {
 			ret[k] = v.value;
 	return ret;
 };
-
-const onePublicUser = u => [u].map(toPublicUser)[0];
 
 const recordContains = field => value => record =>
 	record[field].value === value;
@@ -98,9 +102,12 @@ const URLS = {
 
 module.exports = {
 	client,
+	typeOf,
+	visibilityOf,
+	field,
+	parseHashtag,
 	tweetToRecord,
 	toPublicUser,
-	onePublicUser,
 	recordContains,
 	hashtagify,
 	properValue,

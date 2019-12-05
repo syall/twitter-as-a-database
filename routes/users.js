@@ -4,7 +4,6 @@ const {
 	client,
 	tweetToRecord,
 	toPublicUser,
-	onePublicUser,
 	recordContains,
 	hashtagify,
 	properValue,
@@ -99,7 +98,7 @@ router.post('/create', async (req, res) => {
 		if (!posted)
 			throw new Error();
 
-		res.json(onePublicUser(userToAdd));
+		res.json(toPublicUser(userToAdd));
 	} catch (err) {
 		console.trace(err);
 		res.status(400).json({
@@ -164,7 +163,7 @@ router.put('/update/:user', async (req, res) => {
 		if (!deleted)
 			throw new Error();
 
-		res.json(onePublicUser(userFound));
+		res.json(toPublicUser(userFound));
 	} catch (err) {
 		console.trace(err);
 		res.status(400).json({
