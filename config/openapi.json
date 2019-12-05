@@ -75,71 +75,18 @@
         "parameters": [
           {
             "in": "query",
-            "name": "user",
+            "name": "params",
             "schema": {
-              "type": "string"
+              "type": "object"
             },
+            "style": "form",
+            "explode": true,
             "description": "Users starts with user"
-          },
-          {
-            "in": "query",
-            "name": "active",
-            "schema": {
-              "type": "boolean"
-            },
-            "description": "Users that are active"
           }
         ],
         "responses": {
           "200": {
             "description": "A list of Public Users that fulfill query parameters.",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "steven": {
-                    "value": [
-                      {
-                        "user": "steven",
-                        "active": "true"
-                      }
-                    ]
-                  }
-                },
-                "schema": {
-                  "$ref": "#/components/schemas/Public Users"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "examples": {
-                  "error": {
-                    "value": {
-                      "message": "Unable to get Public Users."
-                    }
-                  }
-                },
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/users/active": {
-      "get": {
-        "summary": "Returns a list of Public Users that are active",
-        "tags": [
-          "Users"
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of Public Users that are active.",
             "content": {
               "application/json": {
                 "examples": {

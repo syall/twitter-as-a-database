@@ -3,8 +3,6 @@ const router = express.Router();
 const {
 	client,
 	tweetToRecord,
-	startWithQuery,
-	userIsActive,
 	toPublicUser,
 	recordContains,
 	URLS,
@@ -23,29 +21,16 @@ router.get('/', async (req, res) => {
 	}
 });
 
-router.get('/active', async (req, res) => {
-	try {
-		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
-		const users = tweets
-			.map(tweetToRecord)
-			.filter(userIsActive);
-		res.json(users.map(toPublicUser));
-	} catch (err) {
-		res.status(400).json({
-			message: 'Unable to get Public Users.'
-		});
-	}
-});
-
 router.get('/search', async (req, res) => {
 	try {
-		const { user, active } = req.query;
 		let users = (await client.get(URLS.get, { screen_name: DEFAULT_DB }))
 			.map(tweetToRecord);
-		if (user)
-			users = users.filter(startWithQuery(user));
-		if (active)
-			users = users.filter(u => u.active.value.toString() === active);
+		for (const [k, v] of Object.entries(req.query))
+			users = users.filter(u =>
+				u[k].visibility === 'PUBLIC'
+					? u[k].value.toString().startsWith(v)
+					: false
+			);
 		res.json(users.map(toPublicUser));
 	} catch (err) {
 		res.status(400).json({
