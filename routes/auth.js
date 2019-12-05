@@ -8,7 +8,7 @@ const {
 } = require('../utils/twitter');
 const { DEFAULT_DB } = process.env;
 
-router.post('/login', async (req, res) => {
+const login = async (req, res) => {
 	try {
 		const { username, password } = req.body;
 		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
@@ -23,10 +23,13 @@ router.post('/login', async (req, res) => {
 			message: 'Authentication Successful!'
 		});
 	} catch (err) {
+		console.log(err);
 		res.status(400).json({
 			message: err.message
 		});
 	}
-});
+};
+router.post('/login', login);
 
 module.exports = router;
+module.exports.login = login;
