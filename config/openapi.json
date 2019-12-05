@@ -143,8 +143,21 @@
               "examples": {
                 "bob": {
                   "value": {
-                    "user": "bob",
-                    "password": "test"
+                    "user": {
+                      "value": "bob",
+                      "type": "STRG",
+                      "visibility": "PUBLIC"
+                    },
+                    "password": {
+                      "value": "test",
+                      "type": "STRG",
+                      "visibility": "SECRET"
+                    },
+                    "active": {
+                      "value": "true",
+                      "type": "BOOL",
+                      "visibility": "PUBLIC"
+                    }
                   }
                 }
               },

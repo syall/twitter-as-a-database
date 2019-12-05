@@ -47,11 +47,6 @@ const tweetToRecord = tweet => {
 	return ret;
 };
 
-const startWithQuery = query => record =>
-	record.user.value.startsWith(query);
-
-const userIsActive = record => record.active.value;
-
 const toPublicUser = u => {
 	ret = {};
 	for (const [k, v] of Object.entries(u))
@@ -60,14 +55,21 @@ const toPublicUser = u => {
 	return ret;
 };
 
+const onePublicUser = u => [u].map(toPublicUser)[0];
+
 const recordContains = field => value => record =>
-	record[field].value === value;
+	record[field].value === value.value;
 
 const hashtagify = ([column, value]) => (`#` +
 	`${column.toUpperCase()}` +
 	`${value.visibility.toUpperCase()}` +
 	`${value.type.toUpperCase()}` +
 	`${value.value}`);
+
+const properValue = v => v.hasOwnProperty('type') &&
+	v.hasOwnProperty('visibility') &&
+	v.hasOwnProperty('value') &&
+	Object.keys(v).length === 3;
 
 const {
 	CONSUMER_PUBLIC_KEY: consumer_key,
@@ -93,10 +95,10 @@ const URLS = {
 module.exports = {
 	client,
 	tweetToRecord,
-	startWithQuery,
-	userIsActive,
 	toPublicUser,
+	onePublicUser,
 	recordContains,
 	hashtagify,
+	properValue,
 	URLS,
 };
