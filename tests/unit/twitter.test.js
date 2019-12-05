@@ -8,7 +8,7 @@ const {
 	recordContains,
 	hashtagify,
 	properValue,
-} = require('../utils/twitter');
+} = require('../../utils/twitter');
 
 describe('Tweet to Record Tests', () => {
 
@@ -161,7 +161,7 @@ describe('Record Tests', () => {
 	test('properValue in record.user is valid', () => {
 		expect(properValue(record.user)).toEqual(true);
 	});
-	
+
 	test('properValue in record.user with added field test is invalid', () => {
 		expect(properValue({ ...record.user, test: 'bad' })).toEqual(false);
 	});
