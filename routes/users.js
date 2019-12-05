@@ -18,6 +18,7 @@ router.get('/', async (req, res) => {
 		const users = tweets.map(tweetToRecord);
 		res.json(users.map(toPublicUser));
 	} catch (err) {
+		console.trace(err);
 		res.status(400).json({
 			message: 'Unable to get Public Users.'
 		});
@@ -29,13 +30,15 @@ router.get('/search', async (req, res) => {
 		let users = (await client.get(URLS.get, { screen_name: DEFAULT_DB }))
 			.map(tweetToRecord);
 		for (const [k, v] of Object.entries(req.query))
-			users = users.filter(u =>
-				u[k].visibility === 'PUBLIC'
+			users = users.filter(u => u[k]
+				? u[k].visibility === 'PUBLIC'
 					? u[k].value.toString().startsWith(v)
 					: false
+				: false
 			);
 		res.json(users.map(toPublicUser));
 	} catch (err) {
+		console.trace(err);
 		res.status(400).json({
 			message: 'Unable to get Public Users.'
 		});
@@ -53,7 +56,7 @@ router.post('/create', async (req, res) => {
 
 		const [userFound] = tweets
 			.map(tweetToRecord)
-			.filter(recordContains('user')(user));
+			.filter(recordContains('user')(user.value));
 		if (userFound)
 			throw new Error();
 
@@ -62,9 +65,13 @@ router.post('/create', async (req, res) => {
 		for (const [k, v] of Object.entries(req.body)) {
 			if (userToAdd[k])
 				throw new Error();
-			const firstLetter = v.value.toString()[0];
-			if (!(firstLetter >= '0' && firstLetter <= '9') &&
-				firstLetter.toUpperCase() === firstLetter)
+			if (v.value === null)
+				throw new Error();
+			if (!Number(v.value.toString()) && v.type === 'NUMB')
+				throw new Error();
+			const fLetter = v.value.toString()[0];
+			if (!Number(fLetter) && v.type !== 'NUMB' &&
+				fLetter.toUpperCase() === fLetter)
 				throw new Error();
 			if (properValue(v)) {
 				userToAdd[k] = v;
@@ -82,6 +89,7 @@ router.post('/create', async (req, res) => {
 
 		res.json(onePublicUser(userToAdd));
 	} catch (err) {
+		console.trace(err);
 		res.status(400).json({
 			message: 'Unable to create user.'
 		});
@@ -99,6 +107,7 @@ router.get('/find/:user', async (req, res) => {
 			throw new Error();
 		res.json(toPublicUser(userFound));
 	} catch (err) {
+		console.trace(err);
 		res.status(400).json({
 			message: 'Unable to get user.'
 		});
@@ -125,8 +134,8 @@ router.put('/update/:user', async (req, res) => {
 				if (!Number(v.value.toString()) && v.type === 'NUMB')
 					throw new Error();
 				const fLetter = v.value.toString()[0];
-				if (!(fLetter >= '0' && fLetter <= '9') &&
-					v.type !== 'NUMB' && fLetter.toUpperCase() === fLetter)
+				if (!Number(fLetter) && v.type !== 'NUMB' &&
+					fLetter.toUpperCase() === fLetter)
 					throw new Error();
 			}
 			if (userFound[k]) {
@@ -163,7 +172,7 @@ router.put('/update/:user', async (req, res) => {
 
 		res.json(onePublicUser(userFound));
 	} catch (err) {
-		console.log(err);
+		console.trace(err);
 		res.status(400).json({
 			message: 'Unable to update user.'
 		});
@@ -184,6 +193,7 @@ router.delete('/delete/:user', async (req, res) => {
 		});
 		res.json(toPublicUser(userFound));
 	} catch (err) {
+		console.trace(err);
 		res.status(400).json({
 			message: 'Unable to delete user.'
 		});
