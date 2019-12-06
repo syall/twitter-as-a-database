@@ -13,8 +13,8 @@ const { DEFAULT_DB } = process.env;
 
 const base = async (req, res) => {
 	try {
-		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
 		const { user } = req.query;
+		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
 		const users = user
 			? tweets
 				.map(tweetToRecord)
@@ -24,13 +24,14 @@ const base = async (req, res) => {
 				.map(tweetToRecord)
 				.map(toPublicUser);
 		if (user && users.length === 0)
-			throw new Error('single');
+			throw new Error();
 		res.json(user ? users[0] : users);
 	} catch (err) {
 		res.status(400).json({
-			message: `Unable to get Public User${err.message !== 'single'
-				? 's'
-				: ''}.`
+			message: `Unable to get Public User${
+				req.query.user
+					? ''
+					: 's'}.`
 		});
 	}
 };
@@ -38,8 +39,9 @@ router.get('/', base);
 
 const search = async (req, res) => {
 	try {
-		let users = (await client.get(URLS.get, { screen_name: DEFAULT_DB }))
-			.map(tweetToRecord);
+		const tweets =
+			await client.get(URLS.get, { screen_name: DEFAULT_DB });
+		let users = tweets.map(tweetToRecord);
 		for (const [k, v] of Object.entries(req.query))
 			users = users.filter(u => u[k]
 				? u[k].visibility === 'public'
