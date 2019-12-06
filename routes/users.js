@@ -76,8 +76,6 @@ const create = async (req, res) => {
 		const newTweet = [];
 		const userToAdd = {};
 		for (const [k, v] of Object.entries(req.body)) {
-			if (userToAdd[k])
-				throw new Error();
 			if (v.value === null)
 				throw new Error();
 			if (!Number(v.value.toString()) && v.type === 'numb')
@@ -99,7 +97,6 @@ const create = async (req, res) => {
 			});
 		if (!posted)
 			throw new Error();
-
 		res.json(toPublicUser(userToAdd));
 	} catch (err) {
 		res.status(400).json({
