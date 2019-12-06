@@ -14,7 +14,7 @@ describe('Path /login Tests', () => {
 		return res;
 	};
 
-	const mockRequest = (data) => ({ body: data });
+	const mockRequest = data => ({ body: data });
 
 	const timeline = `/${URLS.get}.json?screen_name=${DEFAULT_DB}`;
 
