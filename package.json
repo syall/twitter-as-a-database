@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node bin/www",
     "dev": "nodemon -x 'clear;node' bin/www",
-    "test": "jest --passWithNoTests --coverage",
+    "test": "jest --coverage",
     "west": "yarn test --watchAll"
   },
   "dependencies": {
