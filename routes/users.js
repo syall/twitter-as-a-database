@@ -11,7 +11,7 @@ const {
 } = require('../utils/twitter');
 const { DEFAULT_DB } = process.env;
 
-router.get('/', async (req, res) => {
+const base = async (req, res) => {
 	try {
 		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
 		const { user } = req.query;
@@ -27,16 +27,16 @@ router.get('/', async (req, res) => {
 			throw new Error('single');
 		res.json(user ? users[0] : users);
 	} catch (err) {
-		console.trace(err);
 		res.status(400).json({
 			message: `Unable to get Public User${err.message !== 'single'
 				? 's'
 				: ''}.`
 		});
 	}
-});
+};
+router.get('/', base);
 
-router.get('/search', async (req, res) => {
+const search = async (req, res) => {
 	try {
 		let users = (await client.get(URLS.get, { screen_name: DEFAULT_DB }))
 			.map(tweetToRecord);
@@ -49,14 +49,14 @@ router.get('/search', async (req, res) => {
 			);
 		res.json(users.map(toPublicUser));
 	} catch (err) {
-		console.trace(err);
 		res.status(400).json({
 			message: 'Unable to get Public Users.'
 		});
 	}
-});
+};
+router.get('/search', search);
 
-router.post('/create', async (req, res) => {
+const create = async (req, res) => {
 	try {
 		const { user, password } = req.body;
 		if (!user || user.visibility !== 'public' ||
@@ -100,14 +100,14 @@ router.post('/create', async (req, res) => {
 
 		res.json(toPublicUser(userToAdd));
 	} catch (err) {
-		console.trace(err);
 		res.status(400).json({
 			message: 'Unable to create user.'
 		});
 	}
-});
+};
+router.post('/create', create);
 
-router.put('/update/:user', async (req, res) => {
+const update = async (req, res) => {
 	try {
 		const { user } = req.params;
 		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
@@ -165,14 +165,14 @@ router.put('/update/:user', async (req, res) => {
 
 		res.json(toPublicUser(userFound));
 	} catch (err) {
-		console.trace(err);
 		res.status(400).json({
 			message: 'Unable to update user.'
 		});
 	}
-});
+};
+router.put('/update/:user', update);
 
-router.delete('/delete/:user', async (req, res) => {
+const deleteRoute = async (req, res) => {
 	try {
 		const { user } = req.params;
 		const tweets = await client.get(URLS.get, { screen_name: DEFAULT_DB });
@@ -181,16 +181,25 @@ router.delete('/delete/:user', async (req, res) => {
 			.filter(recordContains('user')(user));
 		if (!userFound)
 			throw new Error();
-		await client.post(URLS.delete, {
-			id: userFound.id.value
-		});
+		const { created_at: deleted } =
+			await client.post(URLS.delete, {
+				id: userFound.id.value
+			});
+		if (!deleted)
+			throw new Error();
 		res.json(toPublicUser(userFound));
 	} catch (err) {
-		console.trace(err);
+
 		res.status(400).json({
 			message: 'Unable to delete user.'
 		});
 	}
-});
+};
+router.delete('/delete/:user', deleteRoute);
 
 module.exports = router;
+module.exports.base = base;
+module.exports.search = search;
+module.exports.create = create;
+module.exports.update = update;
+module.exports.deleteRoute = deleteRoute;

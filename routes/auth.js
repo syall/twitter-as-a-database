@@ -23,7 +23,6 @@ const login = async (req, res) => {
 			message: 'Authentication Successful!'
 		});
 	} catch (err) {
-		console.log(err);
 		res.status(400).json({
 			message: err.message
 		});
