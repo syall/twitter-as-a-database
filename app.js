@@ -1,5 +1,4 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const favicon = require('serve-favicon');
 
@@ -7,8 +6,8 @@ const app = new express();
 
 app.disable('x-powered-by');
 app.disable('etag');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
 app.use(favicon('./public/favicon.ico'));
