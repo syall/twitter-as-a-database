@@ -71,6 +71,7 @@ Example of a Tweet:
 ```
 
 Corresponding Table and Record
+
 | user (public)| password (secret)| age (public) | boom (public) |
 | - | - | - | - |
 | "steven" | "test123" | 16 | true |
