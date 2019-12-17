@@ -4,12 +4,18 @@ const router = express.Router();
 
 const contract = require('../config/openapi.json');
 
-const { HOST, PORT, SSL_ENABLED } = process.env;
+const { HOST, SSL_ENABLED } = process.env;
 const ssl = SSL_ENABLED == 'true' ? 's' : '';
-contract.servers = [{
-	url: `http${ssl}://${HOST}:${PORT}`,
-	description: 'development',
-}];
+contract.servers = [
+	{
+		url: `http${ssl}://localhost:3000`,
+		description: 'development',
+	},
+	{
+		url: `https://${HOST}`,
+		description: 'heroku',
+	}
+];
 
 const options = {
 	customSiteTitle: 'Twitter as a Database',
