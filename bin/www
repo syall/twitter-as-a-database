@@ -3,7 +3,9 @@ const path = require('path');
 const fs = require('fs');
 
 const { parsed } = config();
-const { PORT, SSL_ENABLED, HOST: host } = parsed;
+const PORT = process.env.PORT;
+const SSL_ENABLED = process.env.SSL_ENABLED;
+const host = process.env.HOST;
 const port = normalizePort(PORT || 3000);
 const ssl = SSL_ENABLED === 'true';
 
