@@ -11,7 +11,7 @@
     "dev": "nodemon -x 'clear;node' bin/www",
     "test": "jest --coverage",
     "west": "yarn test --watchAll",
-    "lb": "yarn fish-and-loaves ./lb-config.js"
+    "lb": "fish-and-loaves ./lb-config.js"
   },
   "dependencies": {
     "dotenv": "^8.2.0",
