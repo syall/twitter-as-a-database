@@ -1,22 +1,14 @@
 # Twitter as a Database
 
-Twitter as a Database is an extremely crude implementationof a DBMS that features:
+Twitter as a Database is an extremely crude implementation of a DBMS that features:
 
 * Basic Atomic Values with Types
 * Visibility (Public and Secret)
 * ACID Properties
 
-## Installation
+## Usage
 
-Generate a host.key and host.cert file in the config folder to run on https:
-
-```bash
-openssl genrsa 2048 > host.key
-chmod 400 host.key
-openssl req -new -x509 -nodes -sha256 -days 365 -key host.key -out host.cert
-```
-
-Configure a dotenv file in the root folder:
+Configure a `.env` file:
 
 ```bash
 # Hosting Variables
@@ -38,11 +30,11 @@ SSL_ENABLED=<Boolean>
 
 ## Documentation
 
-Twitter as a Database has an OpenAPI 3.0.0 Contract which you can find in /config/openapi.json.
+Twitter as a Database has an OpenAPI 3.0.0 Contract which you can find in `/config/openapi.json`.
 
 ## Basic Features
 
-For now, there is only one test database that uses the "user" field as a primary key based on the DEFAULT_DB (twitter screen_name) and private and public keys set in the .env file.
+For now, there is only one test database that uses the `user` field as a primary key based on the `DEFAULT_DB` (twitter screen_name) and private and public keys set in the `.env` file.
 
 Besides that, every user also has a unique id from the tweet in which the hashtag data is stored, but it is not a public field.
 
@@ -50,14 +42,14 @@ Each field/hashtag is required to have visibility and type properties.
 
 For visibility, there is:
 
-* secret: Only the password field can be secret and cannot be modified
-* public: Modifiable fields that can be seen in any user
+* `secret` : Only the password field can be secret and cannot be modified
+* `public` : Modifiable fields that can be seen in any user
 
-For types, there are only 3 primitive types right now:
+For types, there are 3 primitive types:
 
-* strg: String
-* numb: Number
-* bool: Boolean
+* `strg` : String
+* `numb` : Number
+* `bool` : Boolean
 
 There is a way to create custom types in the future, but for now it is disabled.
 
@@ -87,7 +79,7 @@ However, the rest of the value can be any alphanumeric character as long as it m
 
 ## Motivation
 
-I am currently in Rutgers CS336 and got interested in building my own database.
+While I was in enrolled in [Rutgers CS336](https://www.cs.rutgers.edu/courses/principles-of-information-and-data-management) and got interested in building my own database.
 
 To no one's surprise, it turns out that building databases is ridiculously difficult (at least for me).
 
@@ -103,4 +95,4 @@ Maybe some people will get inspired and think of their own esoteric project.
 
 Either way, to any who read this, thanks for supporting me!
 
-syall
+[syall](https://github.com/syall)
