@@ -3,7 +3,7 @@
   "info": {
     "version": "1.0.0",
     "title": "twitter-as-a-database",
-    "description": "Using Twitter as a Database as a hobby project!",
+    "description": "Using Twitter as a Database as a hobby project! Tweets can be found at <a href=https://twitter.com/tweets_as_a_db>here</a>.",
     "externalDocs": {
       "description": "GitHub Repository",
       "url": "https://github.com/syall/Twitter-as-a-Database"
@@ -13,6 +13,10 @@
     }
   },
   "servers": [
+    {
+      "url": "https://twitter-as-a-db.herokuapp.com/",
+      "description": "heroku"
+    },
     {
       "url": "https://localhost:3000",
       "description": "development"
